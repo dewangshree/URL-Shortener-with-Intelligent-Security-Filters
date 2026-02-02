@@ -32,3 +32,9 @@ main.py
 templates/
 tests/
 urls.db (auto-created at runtime)
+
+
+Setup Instructions
+Clone the repository
+git clone https://github.com/dewangshree/AI-URL-Shortener.git
+cd AI-URL-Shortener
