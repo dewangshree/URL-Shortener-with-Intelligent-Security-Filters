@@ -5,7 +5,6 @@ It allows users to generate short URLs, automatically redirect to original URLs,
 The system is designed with reliability, low latency, and testability in mind.
 
 Features
-
 Shorten long URLs into compact codes
 Redirect short URLs to original destinations
 Automatic URL expiration handling
