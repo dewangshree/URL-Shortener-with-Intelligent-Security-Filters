@@ -33,6 +33,21 @@ templates/
 tests/
 urls.db (auto-created at runtime)
 
+Create virtual environment
+
+python -m venv venv
+
+Activate virtual environment
+
+On macOS or Linux
+source venv/bin/activate
+
+On Windows
+venv\Scripts\activate
+
+Install dependencies
+pip install -r requirements.txt
+
 
 Setup Instructions
 Clone the repository
