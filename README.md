@@ -3,6 +3,11 @@ URL Shortener API with Intelligent Security Filters
 This project is a backend URL shortening service built using Python and FastAPI.
 It generates short URLs, redirects users to original URLs, and blocks unsafe links using intelligent security checks.
 The system is designed for fast response time, reliability, and clean backend architecture.
+Live Demo
+
+ Try the application here:  
+ https://ai-url-shortner-ly68.onrender.com
+
 
 ---
 
