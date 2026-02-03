@@ -176,6 +176,15 @@ Test coverage includes:
 • Invalid short code handling
 
 ---
+## Screenshots
+
+### Home Page
+<img width="670" height="611" alt="Screenshot 2026-02-03 at 7 19 07 PM" src="https://github.com/user-attachments/assets/4d55cab0-d123-4d22-b68c-259f2703b7e8" />
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+
 
 CI Pipeline
 
