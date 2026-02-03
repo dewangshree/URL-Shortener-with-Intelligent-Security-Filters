@@ -22,7 +22,7 @@ DB = "urls.db"
 
 # ---------------- DB INIT ----------------
 def init_db():
-    conn = sqlite3.connect(DB)
+    conn = sqlite3.connect(DB, check_same_thread=False)
     c = conn.cursor()
     c.execute("""
         CREATE TABLE IF NOT EXISTS urls (
@@ -73,17 +73,11 @@ def analyze_url(url: str):
 
 
 def explain_with_llm(url: str, reasons: list[str]) -> str:
-    """
-    ⚡ FAST, SAFE, NON-BLOCKING AI
-    - Hard timeout
-    - Graceful fallback
-    - Never crashes server
-    """
     try:
         if not os.getenv("OPENAI_API_KEY"):
             raise RuntimeError("AI key not configured")
 
-        client = OpenAI(timeout=1.0)  # ⏱ hard timeout
+        client = OpenAI(timeout=1.0)
 
         prompt = f"""
 URL: {url}
@@ -108,8 +102,8 @@ Explain briefly why this URL may be unsafe.
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(
-        request,
-        "index.html"
+        "index.html",
+        {"request": request}
     )
 
 
@@ -121,19 +115,17 @@ def shorten(
 ):
     score, reasons = analyze_url(url)
 
-    # 🚨 BLOCK UNSAFE URLS INSTANTLY
     if score >= 3:
         explanation = explain_with_llm(url, reasons)
         return templates.TemplateResponse(
-            request,
             "index.html",
             {
+                "request": request,
                 "error": "⚠️ This URL looks unsafe",
                 "llm_explanation": explanation
             }
         )
 
-    # -------- EXPIRY (timezone-aware) --------
     now = datetime.now(timezone.utc)
 
     if expiry == "1h":
@@ -145,7 +137,7 @@ def shorten(
 
     code = generate_code()
 
-    conn = sqlite3.connect(DB)
+    conn = sqlite3.connect(DB, check_same_thread=False)
     c = conn.cursor()
     c.execute(
         "INSERT INTO urls (original, short, expires_at) VALUES (?, ?, ?)",
@@ -154,12 +146,14 @@ def shorten(
     conn.commit()
     conn.close()
 
-    short_url = f"http://127.0.0.1:8000/{code}"
+    # ⭐ Dynamic Domain (IMPORTANT FOR RENDER)
+    base_url = str(request.base_url)
+    short_url = f"{base_url}{code}"
 
     return templates.TemplateResponse(
-        request,
         "index.html",
         {
+            "request": request,
             "short_url": short_url,
             "expiry_info": expires_at.strftime("%Y-%m-%d %H:%M:%S UTC")
         }
@@ -168,7 +162,7 @@ def shorten(
 
 @app.get("/{code}")
 def redirect(code: str):
-    conn = sqlite3.connect(DB)
+    conn = sqlite3.connect(DB, check_same_thread=False)
     c = conn.cursor()
     c.execute("SELECT original, expires_at FROM urls WHERE short = ?", (code,))
     row = c.fetchone()
