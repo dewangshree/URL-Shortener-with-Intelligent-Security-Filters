@@ -1,3 +1,11 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '3.11'
@@ -9,5 +17,5 @@
   displayName: 'Install dependencies'
 
 - script: |
-    pytest
+    python -m pytest
   displayName: 'Run tests'
