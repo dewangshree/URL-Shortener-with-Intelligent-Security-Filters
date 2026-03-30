@@ -1,380 +1,307 @@
 <div align="center">
 
-# 🔗 URL Shortener API
+# 🔗 LinkCut
+### URL Shortener with Intelligent Security Filters
 
-### Intelligent Security Filters · FastAPI · Azure DevOps CI
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com)
+[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://sqlite.org)
+[![Deployed on Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://render.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi)
-![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4.1-412991?style=for-the-badge&logo=openai)
-![Azure DevOps](https://img.shields.io/badge/Azure%20DevOps-CI%20Pipeline-0078D7?style=for-the-badge&logo=azuredevops)
-![pytest](https://img.shields.io/badge/pytest-Tested-0A9EDC?style=for-the-badge&logo=pytest)
-![Render](https://img.shields.io/badge/Deployed-Render-46E3B7?style=for-the-badge&logo=render)
-![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+> **Shorten smarter. Share safer.**  
+> LinkCut shortens URLs while running every link through an AI-powered security pipeline — blocking phishing, malware, and malicious redirects before they reach anyone.
 
-A backend URL shortening service built with **Python** and **FastAPI** that generates short URLs, handles redirects, enforces expiry, and blocks malicious links using intelligent rule-based security scoring — with optional AI-powered explanations via GPT-4.1-mini.
-
-🚀 **[Live Demo →](https://ai-url-shortner-ly68.onrender.com)**
+[🌐 Live Demo](https://ai-url-shortner-ly68.onrender.com) · [📄 API Docs](https://ai-url-shortner-ly68.onrender.com/docs) · [🐛 Report a Bug](https://github.com/dewangshree/URL-Shortener-with-Intelligent-Security-Filters/issues)
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## 📌 Table of Contents
 
 - [Overview](#-overview)
 - [Features](#-features)
-- [System Architecture](#-system-architecture)
-- [Security Logic](#-security-logic)
+- [Architecture](#-architecture)
 - [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [API Reference](#-api-reference)
+- [Security Pipeline](#-security-pipeline)
 - [Project Structure](#-project-structure)
-- [Installation](#-installation)
-- [Running the Application](#-running-the-application)
-- [API Endpoints](#-api-endpoints)
-- [Running Tests](#-running-tests)
-- [CI Pipeline](#-ci-pipeline)
-- [Screenshots](#-screenshots)
-- [Future Improvements](#-future-improvements)
+- [Environment Variables](#-environment-variables)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
 
 ---
 
-## 🔷 Overview
+## 🧠 Overview
 
-> A production-ready URL shortening API designed for **fast response time**, **reliability**, and **clean backend architecture**. The system scores every URL against a rule-based security engine before shortening — and optionally generates an AI explanation when a URL is blocked.
+**LinkCut** is a production-grade URL shortener that goes beyond simple redirection. Every URL submitted is passed through an **intelligent, LLM-backed security layer** that detects malicious intent — including phishing attempts, suspicious redirects, and known malware patterns — before a short link is ever generated.
 
-| Capability | Implementation |
-|---|---|
-| URL Shortening | FastAPI + SQLite persistence |
-| Malicious URL Detection | Rule-based risk scoring engine |
-| AI Explanations | OpenAI GPT-4.1-mini (optional, safe fallback) |
-| URL Expiry | Configurable 1h / 1d / 7d expiry |
-| Testing | pytest automated test suite |
-| CI/CD | Azure DevOps Pipelines (multi-Python) |
+This project was built to demonstrate how AI can be integrated into utility-grade APIs to add real-world safety value, not just convenience.
 
 ---
 
 ## ✨ Features
 
-```
-✅ Shorten long URLs to compact short codes
-✅ Redirect short URLs to original destinations
-✅ URL expiration handling (1h / 1d / 7d)
-✅ Malicious URL detection via rule-based scoring
-✅ Optional AI explanation for blocked URLs
-✅ Safe fallback — AI errors never crash the app
-✅ SQLite database for persistent storage
-✅ Clean REST API design
-✅ Automated test suite with pytest
-✅ CI pipeline via Azure DevOps (multi-Python)
-```
-
----
-
-## 🏗 System Architecture
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                        USER / CLIENT                         │
-│             Web Browser / API Client / curl                  │
-└──────────────────────────┬───────────────────────────────────┘
-                           │
-                           │  HTTP Request
-                           ▼
-┌──────────────────────────────────────────────────────────────┐
-│                     FASTAPI BACKEND                          │
-│  • POST /shorten   →  Create short URL                       │
-│  • GET /{code}     →  Redirect to original                   │
-│  • GET /{code}/info →  Fetch URL metadata                    │
-└──────────────────────────┬───────────────────────────────────┘
-                           │
-               ┌───────────┴────────────┐
-               ▼                        ▼
-┌──────────────────────┐   ┌────────────────────────────────────┐
-│  SECURITY SCORING    │   │         SQLITE DATABASE            │
-│  ENGINE              │   │                                    │
-│                      │   │  • short_code                      │
-│  • URL length check  │   │  • original_url                    │
-│  • Keyword scanning  │   │  • created_at                      │
-│  • Special chars     │   │  • expires_at                      │
-│  • Subdomain depth   │   │  • click_count                     │
-│  • IP-based URLs     │   └────────────────────────────────────┘
-└──────────┬───────────┘
-           │
-           │ If URL blocked
-           ▼
-┌──────────────────────────────────────────────────────────────┐
-│              OPENAI GPT-4.1-mini (Optional)                  │
-│  • Generates human-readable explanation for blocked URL      │
-│  • Falls back gracefully if API key not set                  │
-└──────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🔐 Security Logic
-
-Every submitted URL is scored across **5 risk signals** before being shortened:
-
-```
-Signal 1 → URL length              (unusually long URLs score higher risk)
-Signal 2 → Suspicious keywords     (known malware/phishing terms)
-Signal 3 → Special character freq  (excessive symbols suggest obfuscation)
-Signal 4 → Multiple subdomains     (deep subdomain chains are a red flag)
-Signal 5 → IP-based URLs           (raw IP addresses instead of domains)
-```
-
-**Decision logic:**
-
-```
-Total Risk Score < Threshold  →  URL is shortened and stored
-Total Risk Score ≥ Threshold  →  URL is blocked instantly
-                                 AI explanation generated (if key set)
-                                 Safe fallback message if AI unavailable
-```
-
-> AI explanations are **optional** and **never crash the application** — the system works fully without an OpenAI key.
-
----
-
-## 🧰 Tech Stack
-
-| Layer | Technology |
+| Feature | Description |
 |---|---|
-| **Language** | Python 3.10+ |
-| **Backend Framework** | FastAPI |
-| **Database** | SQLite (auto-created at runtime) |
-| **AI Layer** | OpenAI GPT-4.1-mini (optional) |
-| **Testing** | pytest |
-| **CI/CD** | Azure DevOps Pipelines |
-| **Server** | Uvicorn |
-| **Deployment** | Render |
+| 🔗 **URL Shortening** | Generates clean, collision-free short codes for any valid URL |
+| 🤖 **AI Security Analysis** | Uses OpenAI to classify URLs as safe, suspicious, or malicious before shortening |
+| 🛡️ **Phishing Detection** | Identifies deceptive domains mimicking trusted services |
+| 📊 **Click Tracking** | Logs every redirect with timestamp metadata |
+| 🗃️ **Persistent Storage** | SQLite-backed with proper schema for URLs and request logs |
+| 📄 **Auto-generated API Docs** | Full Swagger UI at `/docs` and ReDoc at `/redoc` |
+| 🚀 **Production Deployment** | Hosted on Render with zero-config continuous deployment |
 
 ---
 
-## 📂 Project Structure
+## 🏗️ Architecture
 
 ```
-AI-URL-Shortener/
-│
-├── main.py                 # FastAPI app, routes, core logic
-├── templates/              # HTML templates (frontend UI)
-│
-├── tests/                  # pytest test suite
-│   └── test_main.py
-│
-├── urls.db                 # SQLite database (auto-generated)
-├── requirements.txt        # Python dependencies
-├── azure-pipelines.yml     # Azure DevOps CI config
-├── .env                    # Environment variables (not committed)
-├── .gitignore
-└── README.md
+┌──────────────────────────────────────────────────────────┐
+│                        CLIENT                            │
+│              (Browser / API Consumer)                    │
+└─────────────────────────┬────────────────────────────────┘
+                          │  HTTP Request
+                          ▼
+┌──────────────────────────────────────────────────────────┐
+│                    FastAPI Backend                        │
+│                                                          │
+│   POST /shorten                GET /{short_code}         │
+│        │                              │                  │
+│        ▼                              ▼                  │
+│  ┌─────────────────┐      ┌──────────────────────┐       │
+│  │ Security Filter │      │   Redirect Handler   │       │
+│  │  (AI Pipeline)  │      │  (Click Log + 302)   │       │
+│  └────────┬────────┘      └──────────────────────┘       │
+│           │                                              │
+│           ▼                                              │
+│  ┌─────────────────┐                                     │
+│  │   OpenAI API    │  ← URL Classification Prompt        │
+│  │  (GPT-4o-mini)  │                                     │
+│  └────────┬────────┘                                     │
+│           │ SAFE / SUSPICIOUS / MALICIOUS                │
+│           ▼                                              │
+│  ┌─────────────────┐                                     │
+│  │  SQLite Database│                                     │
+│  │  urls | logs    │                                     │
+│  └─────────────────┘                                     │
+└──────────────────────────────────────────────────────────┘
 ```
+
+**Request flow for `POST /shorten`:**
+1. Validate URL format
+2. Send URL to OpenAI for security classification
+3. If classified **SAFE** → generate short code → store in DB → return short URL
+4. If **SUSPICIOUS** or **MALICIOUS** → reject with a descriptive error
+
+**Request flow for `GET /{short_code}`:**
+1. Look up short code in DB
+2. Log the redirect event (timestamp, IP if available)
+3. Return `302 Redirect` to the original URL
 
 ---
 
-## ⚙ Installation
+## 🛠️ Tech Stack
 
-**1. Clone the repository**
+| Layer | Technology | Purpose |
+|---|---|---|
+| **API Framework** | FastAPI | High-performance async REST API |
+| **AI Layer** | OpenAI GPT-4o-mini | Intelligent URL security classification |
+| **Database** | SQLite + SQLAlchemy | Lightweight persistent storage |
+| **Validation** | Pydantic v2 | Request/response schema enforcement |
+| **Hosting** | Render | Cloud deployment with auto-deploy from GitHub |
+| **Docs** | Swagger UI (built-in) | Interactive API exploration at `/docs` |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.11+
+- An [OpenAI API key](https://platform.openai.com/api-keys)
+
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/dewangshree/AI-URL-Shortener.git
-cd AI-URL-Shortener
+git clone https://github.com/dewangshree/URL-Shortener-with-Intelligent-Security-Filters.git
+cd URL-Shortener-with-Intelligent-Security-Filters
 ```
 
-**2. Create a virtual environment**
+### 2. Create and activate a virtual environment
 
 ```bash
 python -m venv venv
+source venv/bin/activate        # Linux/macOS
+venv\Scripts\activate           # Windows
 ```
 
-**3. Activate the virtual environment**
-
-macOS / Linux:
-
-```bash
-source venv/bin/activate
-```
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-**4. Install dependencies**
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**5. (Optional) Set OpenAI API key for AI explanations**
+### 4. Set environment variables
 
 ```bash
-export OPENAI_API_KEY=your_openai_key_here
+cp .env.example .env
+# Then edit .env and add your OPENAI_API_KEY
 ```
 
-Verify the key is set:
-
-```bash
-echo $OPENAI_API_KEY
-```
-
-> If not set, the app runs fully — AI explanations are simply skipped with a safe fallback message.
-
----
-
-## ▶ Running the Application
+### 5. Run the server
 
 ```bash
 uvicorn main:app --reload
 ```
 
-Application available at:
+The API will be live at `http://localhost:8000`  
+Swagger docs at `http://localhost:8000/docs`
 
-```
-http://127.0.0.1:8000
-```
-
-Interactive API docs at:
-
-```
-http://127.0.0.1:8000/docs
-```
+> 🌐 **Live deployment:** [https://ai-url-shortner-ly68.onrender.com](https://ai-url-shortner-ly68.onrender.com)  
+> 📄 **Live API docs:** [https://ai-url-shortner-ly68.onrender.com/docs](https://ai-url-shortner-ly68.onrender.com/docs)
 
 ---
 
-## 🔌 API Endpoints
+## 📡 API Reference
 
-### `POST /shorten` — Create a short URL
+### `POST /shorten`
 
-**Request (form data):**
+Shorten a URL after running it through the AI security filter.
 
-```
-url    = https://example.com
-expiry = 1h | 1d | 7d
-```
-
-**Success response:**
-
+**Request Body:**
 ```json
 {
-  "short_url": "http://127.0.0.1:8000/abc123",
-  "expires_at": "2024-11-16T20:00:00Z"
+  "url": "https://example.com/some/long/path"
 }
 ```
 
-**Blocked URL response:**
-
+**Response (200 — Safe URL):**
 ```json
 {
-  "error": "URL blocked",
-  "explanation": "This URL contains suspicious patterns associated with phishing."
+  "short_url": "http://localhost:8000/aB3kQz",
+  "original_url": "https://example.com/some/long/path",
+  "security_status": "safe"
+}
+```
+
+**Response (400 — Malicious URL):**
+```json
+{
+  "detail": "URL flagged as malicious by security filter. Short link not created."
 }
 ```
 
 ---
 
-### `GET /{short_code}` — Redirect to original URL
+### `GET /{short_code}`
 
-```
-http://127.0.0.1:8000/abc123
-```
+Redirect to the original URL.
 
-Redirects the user to the original long URL. Returns `404` if expired or not found.
-
----
-
-### `GET /{short_code}/info` — Fetch URL metadata
-
-```json
-{
-  "short_code": "abc123",
-  "original_url": "https://example.com",
-  "created_at": "2024-11-15T19:00:00Z",
-  "expires_at": "2024-11-16T19:00:00Z",
-  "click_count": 14
-}
-```
+| Status | Meaning |
+|---|---|
+| `302` | Successful redirect |
+| `404` | Short code not found |
 
 ---
 
-## 🧪 Running Tests
+### `GET /docs`
+
+Auto-generated interactive Swagger UI for all endpoints.
+
+---
+
+## 🛡️ Security Pipeline
+
+LinkCut's AI security layer uses a structured prompt sent to **GPT-4o-mini** that instructs the model to evaluate URLs across several threat dimensions:
+
+- **Domain spoofing** — lookalike domains mimicking trusted brands (e.g., `paypa1.com`)
+- **Suspicious TLDs** — common in phishing campaigns (`.xyz`, `.tk`, `.ml`, etc.)
+- **Redirector abuse** — URL shorteners used to mask final destinations
+- **Known malware patterns** — paths and query strings matching known attack vectors
+- **Structural anomalies** — excessive subdomains, unusually long paths, encoded payloads
+
+The model returns one of three verdicts:
+
+```
+SAFE         → Short link is created and returned
+SUSPICIOUS   → Request is rejected with a warning
+MALICIOUS    → Request is rejected with a clear error
+```
+
+This keeps the pipeline honest: the AI does not guess, it classifies with structured output enforced by the system prompt.
+
+---
+
+## 📁 Project Structure
+
+```
+URL-Shortener-with-Intelligent-Security-Filters/
+├── main.py               # FastAPI app, route definitions
+├── database.py           # SQLAlchemy setup, models, session
+├── security.py           # OpenAI security classification logic
+├── models.py             # Pydantic request/response schemas
+├── requirements.txt      # Python dependencies
+├── .env.example          # Environment variable template
+└── README.md
+```
+
+---
+
+## 🔐 Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `OPENAI_API_KEY` | ✅ | Your OpenAI API key |
+| `BASE_URL` | Optional | Base URL for generated short links (defaults to `localhost:8000`) |
+| `DATABASE_URL` | Optional | SQLite DB path (defaults to `./linkcut.db`) |
+
+---
+
+## ☁️ Deployment
+
+This project is deployed on **Render** with the following configuration:
+
+- **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- **Environment:** Python 3.11
+- **Build:** `pip install -r requirements.txt`
+
+To deploy your own instance:
+
+1. Fork this repository
+2. Connect it to [Render](https://render.com)
+3. Add `OPENAI_API_KEY` as an environment variable in the Render dashboard
+4. Deploy — Render will auto-build and serve the app
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome. To get started:
 
 ```bash
-python -m pytest
+# Fork the repo, then:
+git checkout -b feature/your-feature-name
+git commit -m "feat: add your feature"
+git push origin feature/your-feature-name
+# Open a Pull Request
 ```
 
-**Test coverage includes:**
-
-```
-✔  Home page loading
-✔  Safe URL shortening flow
-✔  Malicious URL blocking
-✔  Invalid short code handling
-✔  Expiry validation
-```
-
----
-
-## 🔄 CI Pipeline
-
-Azure DevOps pipeline automatically runs the full test suite on every push across multiple Python versions.
-
-```yaml
-# Triggers on every push
-trigger:
-  - main
-
-# Runs pytest across Python 3.10, 3.11, 3.12
-strategy:
-  matrix:
-    Python310:
-      pythonVersion: "3.10"
-    Python311:
-      pythonVersion: "3.11"
-    Python312:
-      pythonVersion: "3.12"
-```
-
----
-
-## 📸 Screenshots
-
-### URL Shortener Interface
-
-<img width="670" alt="URL Shortener - Home" src="https://github.com/user-attachments/assets/4d55cab0-d123-4d22-b68c-259f2703b7e8" />
-
-### Malicious URL Blocked
-
-<img width="670" alt="URL Shortener - Blocked URL" src="https://github.com/user-attachments/assets/c9893530-416c-4047-8071-440e81371178" />
-
----
-
-## 🚀 Future Improvements
-
-```
-[ ] User authentication and personal URL dashboards
-[ ] Click analytics with geographic breakdown
-[ ] QR code generation for short URLs
-[ ] Custom short code aliases
-[ ] Rate limiting per IP address
-[ ] Upgrade to PostgreSQL for production scale
-[ ] Webhook support on redirect events
-```
+Please keep PRs focused and include a brief description of what changed and why.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
 <div align="center">
 
-**Built with FastAPI · SQLite · OpenAI · Azure DevOps · Render**
-
-⭐ Star this repo if you found it helpful!
+Built by [Shreyas Dewangswami](https://github.com/dewangshree)
 
 </div>
