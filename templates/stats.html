@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkCut — Analytics</title>
+  <!-- Real QR code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    [data-theme="light"] {
+      --bg:        #F4F1ED;
+      --card:      #FFFFFF;
+      --ink:       #1A1A1A;
+      --muted:     #6B6B6B;
+      --rule:      #E2DDD8;
+      --accent:    #D4450C;
+      --accent-lt: #FDF1EC;
+      --green:     #1A7A40;
+      --green-lt:  #EDF7F1;
+      --green-br:  #A8D9BC;
+      --red-lt:    #FEF0ED;
+      --red-br:    #F5B8A8;
+      --yellow-lt: #FFFBEB;
+      --yellow-br: #F5D88A;
+      --yellow-ink:#7A5C00;
+      --stat-bg:   #F0EDE8;
+    }
+    [data-theme="dark"] {
+      --bg:        #111110;
+      --card:      #1C1B19;
+      --ink:       #EDE8E0;
+      --muted:     #857E75;
+      --rule:      #2A2825;
+      --accent:    #E05520;
+      --accent-lt: #2A1A12;
+      --green:     #4DB87A;
+      --green-lt:  #0D2318;
+      --green-br:  #2A6644;
+      --red-lt:    #2A100A;
+      --red-br:    #7A2A18;
+      --yellow-lt: #1E1A08;
+      --yellow-br: #6B5500;
+      --yellow-ink:#E8C84A;
+      --stat-bg:   #242220;
+    }
+
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; transition: background .25s, color .25s; }
+
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--rule); background: var(--card); }
+    .brand { font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: -0.5px; }
+    .brand span { color: var(--accent); }
+    .toggle-btn { background: none; border: 1px solid var(--rule); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.82rem; color: var(--muted); font-family: inherit; transition: border-color .2s, color .2s; }
+    .toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Global strip */
+    .global-strip { background: var(--card); border-bottom: 1px solid var(--rule); padding: 10px 28px; display: flex; gap: 24px; align-items: center; flex-wrap: wrap; font-size: 0.78rem; }
+    .gstat { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+    .gstat strong { color: var(--ink); font-weight: 600; }
+    .gstat-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+    .main { max-width: 680px; margin: 36px auto; padding: 0 20px 80px; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--muted); text-decoration: none; margin-bottom: 24px; transition: color .15s; }
+    .back-link:hover { color: var(--accent); }
+
+    .page-title { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 4px; }
+    .page-title span { color: var(--accent); }
+    .page-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 28px; }
+
+    .card { background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+
+    .short-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .short-mono { font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 2px solid var(--green); word-break: break-all; }
+    .short-mono:hover { color: var(--accent); }
+
+    .btn-sm { padding: 7px 14px; border-radius: 6px; font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1.5px solid var(--rule); background: var(--card); color: var(--ink); text-decoration: none; transition: all .15s; white-space: nowrap; display: inline-block; }
+    .btn-sm:hover { border-color: var(--green); color: var(--green); }
+    .btn-sm.copied { border-color: var(--green); color: var(--green); background: var(--green-lt); }
+
+    /* Metrics — clarified labels */
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .metric { background: var(--stat-bg); border-radius: 12px; padding: 18px 20px; }
+    .metric-val { font-family: 'Space Mono', monospace; font-size: 2.4rem; font-weight: 700; letter-spacing: -2px; line-height: 1; }
+    .metric-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; margin-top: 6px; }
+    .metric-sub { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+    .metric.accent .metric-val { color: var(--accent); }
+
+    .section-head { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 14px; }
+
+    .threat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .threat-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+    .threat-clean     { background: var(--green-lt); color: var(--green); border: 1.5px solid var(--green-br); }
+    .threat-suspected { background: var(--yellow-lt); color: var(--yellow-ink); border: 1.5px solid var(--yellow-br); }
+    .threat-dangerous { background: var(--red-lt); color: var(--accent); border: 1.5px solid var(--red-br); }
+
+    .score-track { height: 6px; background: var(--rule); border-radius: 4px; overflow: hidden; }
+    .score-fill { height: 100%; border-radius: 4px; transition: width .7s ease; width: 0%; }
+    .score-fill.clean     { background: var(--green); }
+    .score-fill.suspected { background: #E8C84A; }
+    .score-fill.dangerous { background: var(--accent); }
+    .score-meta { display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.72rem; color: var(--muted); }
+
+    .reasons { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .reason-item { font-size: 0.82rem; padding: 7px 12px; background: var(--yellow-lt); border: 1px solid var(--yellow-br); border-radius: 6px; color: var(--yellow-ink); }
+
+    .info-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
+    .info-row:last-child { border-bottom: none; }
+    .info-key { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); flex-shrink: 0; }
+    .info-val { font-size: 0.86rem; color: var(--ink); text-align: right; word-break: break-all; }
+    .info-val a { color: var(--accent); text-decoration: none; }
+    .info-val a:hover { text-decoration: underline; }
+    .badge-live    { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.73rem; font-weight: 700; background: var(--green-lt); color: var(--green); border: 1px solid var(--green-br); }
+    .badge-expired { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.73rem; font-weight: 700; background: var(--red-lt); color: var(--accent); border: 1px solid var(--red-br); }
+
+    /* QR */
+    .qr-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 8px 0; }
+    #qrcode { border-radius: 10px; overflow: hidden; border: 1px solid var(--rule); padding: 12px; background: #fff; }
+    #qrcode img { display: block; }
+    .qr-hint { font-size: 0.75rem; color: var(--muted); text-align: center; }
+
+    /* Global grid */
+    .global-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .g-stat { background: var(--stat-bg); border-radius: 10px; padding: 14px; text-align: center; }
+    .g-stat-val { font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; }
+    .g-stat-val.red    { color: var(--accent); }
+    .g-stat-val.yellow { color: var(--yellow-ink); }
+    .g-stat-val.green  { color: var(--green); }
+    .g-stat-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 600; margin-top: 4px; }
+
+    .footer { text-align: center; margin-top: 40px; font-size: 0.72rem; color: var(--muted); }
+
+    @media (max-width: 480px) {
+      .metrics { grid-template-columns: 1fr; }
+      .global-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+
+<body
+  id="pageData"
+  data-short="{{ short }}"
+  data-base-url="{{ base_url }}"
+  data-threat-score="{{ threat_score }}"
+  data-threat-label="{{ threat_label }}"
+>
+
+<div class="topbar">
+  <a class="brand" href="/">Link<span>Cut</span></a>
+  <button class="toggle-btn" id="themeBtn">🌙 Dark</button>
+</div>
+
+<!-- Global strip — platform-wide numbers -->
+<div class="global-strip">
+  <div class="gstat"><span class="gstat-dot" style="background:var(--accent)"></span> <strong>{{ total_urls }}</strong> total links</div>
+  <div class="gstat"><span class="gstat-dot" style="background:var(--green)"></span> <strong>{{ total_clicks }}</strong> platform clicks</div>
+  <div class="gstat"><span class="gstat-dot" style="background:#E05520"></span> <strong>{{ phishing_blocked }}</strong> phishing blocked</div>
+  <div class="gstat"><span class="gstat-dot" style="background:#E8C84A"></span> <strong>{{ suspected_count }}</strong> suspected</div>
+</div>
+
+<div class="main">
+
+  <a class="back-link" href="/">← Shorten another URL</a>
+
+  <div class="page-title">📊 Analytics<span>.</span></div>
+  <p class="page-sub">Stats for your short link <strong>/{{ short }}</strong></p>
+
+  <!-- Short URL -->
+  <div class="card">
+    <div class="section-head">Your Short Link</div>
+    <div class="short-row">
+      <a class="short-mono" href="{{ base_url }}/{{ short }}" target="_blank" id="shortUrlEl">{{ base_url }}/{{ short }}</a>
+      <button class="btn-sm" id="copyBtn" onclick="copyUrl()">Copy</button>
+      <a class="btn-sm" href="{{ base_url }}/{{ short }}" target="_blank">Open ↗</a>
+    </div>
+  </div>
+
+  <!-- Metrics — clearly labelled THIS link vs platform -->
+  <div class="metrics">
+    <div class="metric accent">
+      <div class="metric-val">{{ click_count }}</div>
+      <div class="metric-label">This Link's Clicks</div>
+      <div class="metric-sub">Times /{{ short }} was visited</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="font-size:1.15rem;letter-spacing:-0.5px;">{{ time_remaining }}</div>
+      <div class="metric-label">Time Remaining</div>
+      <div class="metric-sub">Expires {{ expires_at }}</div>
+    </div>
+  </div>
+
+  <!-- Security -->
+  <div class="card">
+    <div class="section-head">Security Analysis</div>
+    <div class="threat-row">
+      {% if threat_label == "clean" %}
+        <span class="threat-badge threat-clean">✅ Clean — No Threats</span>
+      {% elif threat_label == "suspected" %}
+        <span class="threat-badge threat-suspected">⚠️ Suspected — Visitors See Warning</span>
+      {% else %}
+        <span class="threat-badge threat-dangerous">🚨 Dangerous — Link is Blocked</span>
+      {% endif %}
+      <span style="font-size:0.8rem;color:var(--muted);">Score: <strong>{{ threat_score }}</strong>/5</span>
+    </div>
+
+    <div class="score-track">
+      <div class="score-fill {{ threat_label }}" id="scoreFill"></div>
+    </div>
+    <div class="score-meta"><span>Safe</span><span>Dangerous</span></div>
+
+    {% if threat_reasons %}
+    <div class="reasons">
+      {% for reason in threat_reasons %}
+      <div class="reason-item">⚠️ {{ reason }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Link Details -->
+  <div class="card">
+    <div class="section-head">Link Details</div>
+    <div class="info-row">
+      <span class="info-key">Status</span>
+      <span class="info-val">
+        {% if is_expired %}<span class="badge-expired">Expired</span>{% else %}<span class="badge-live">Live ✓</span>{% endif %}
+      </span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Created</span>
+      <span class="info-val">{{ created_at }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Expires</span>
+      <span class="info-val">{{ expires_at }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Short Code</span>
+      <span class="info-val" style="font-family:'Space Mono',monospace;">/{{ short }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Original URL</span>
+      <span class="info-val"><a href="{{ original }}" target="_blank" rel="noopener noreferrer">{{ original }}</a></span>
+    </div>
+  </div>
+
+  <!-- QR Code — real scannable -->
+  <div class="card">
+    <div class="section-head">QR Code — Scan with your phone camera</div>
+    <div class="qr-wrap">
+      <div id="qrcode"></div>
+      <p class="qr-hint">Scan to open <strong>{{ base_url }}/{{ short }}</strong></p>
+      <button class="btn-sm" onclick="downloadQR()">⬇ Download QR as PNG</button>
+    </div>
+  </div>
+
+  <!-- Platform Overview -->
+  <div class="card">
+    <div class="section-head">Platform Overview — All Links</div>
+    <div class="global-grid">
+      <div class="g-stat">
+        <div class="g-stat-val">{{ total_urls }}</div>
+        <div class="g-stat-label">Total Links</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-val green">{{ total_clicks }}</div>
+        <div class="g-stat-label">Total Clicks</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-val red">{{ phishing_blocked }}</div>
+        <div class="g-stat-label">Phishing Blocked</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-val yellow">{{ suspected_count }}</div>
+        <div class="g-stat-label">Suspected</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Built with FastAPI · SQLite · OpenAI GPT-4o-mini</div>
+</div>
+
+<script>
+  // Read values safely from data attributes — no Jinja2 inside JS
+  const pageData     = document.getElementById('pageData');
+  const SHORT_CODE   = pageData.dataset.short;
+  const BASE_URL     = pageData.dataset.baseUrl;
+  const THREAT_SCORE = parseInt(pageData.dataset.threatScore, 10) || 0;
+  const THREAT_LABEL = pageData.dataset.threatLabel;
+  const SHORT_URL    = BASE_URL + '/' + SHORT_CODE;
+
+  // ── Theme ──
+  const html = document.documentElement;
+  const btn  = document.getElementById('themeBtn');
+  function applyTheme(t) {
+    html.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️ Light' : '🌙 Dark';
+    localStorage.setItem('lc-theme', t);
+  }
+  applyTheme(localStorage.getItem('lc-theme') || 'light');
+  btn.addEventListener('click', () =>
+    applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+  );
+
+  // ── Copy ──
+  function copyUrl() {
+    navigator.clipboard.writeText(SHORT_URL).then(() => {
+      const b = document.getElementById('copyBtn');
+      b.textContent = 'Copied ✓';
+      b.classList.add('copied');
+      setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('copied'); }, 2200);
+    });
+  }
+
+  // ── Score fill ──
+  setTimeout(() => {
+    const pct = Math.min((THREAT_SCORE / 5) * 100, 100);
+    document.getElementById('scoreFill').style.width = pct + '%';
+  }, 300);
+
+  // ── Real QR Code using qrcode.js library ──
+  new QRCode(document.getElementById('qrcode'), {
+    text:          SHORT_URL,
+    width:         180,
+    height:        180,
+    colorDark:     '#1A1A1A',
+    colorLight:    '#ffffff',
+    correctLevel:  QRCode.CorrectLevel.H,
+  });
+
+  function downloadQR() {
+    const img = document.querySelector('#qrcode img');
+    if (!img) return;
+    const a = document.createElement('a');
+    a.download = 'linkcut-' + SHORT_CODE + '-qr.png';
+    a.href = img.src;
+    a.click();
+  }
+</script>
+</body>
+</html>

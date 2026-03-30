@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkCut — Safety Warning</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    [data-theme="light"] {
+      --bg:        #F4F1ED;
+      --card:      #FFFFFF;
+      --ink:       #1A1A1A;
+      --muted:     #6B6B6B;
+      --rule:      #E2DDD8;
+      --accent:    #D4450C;
+      --accent-lt: #FDF1EC;
+      --green:     #1A7A40;
+      --green-lt:  #EDF7F1;
+      --green-br:  #A8D9BC;
+      --red-lt:    #FEF0ED;
+      --red-br:    #F5B8A8;
+      --yellow-lt: #FFFBEB;
+      --yellow-br: #F5D88A;
+      --yellow-ink:#7A5C00;
+    }
+    [data-theme="dark"] {
+      --bg:        #111110;
+      --card:      #1C1B19;
+      --ink:       #EDE8E0;
+      --muted:     #857E75;
+      --rule:      #2A2825;
+      --accent:    #E05520;
+      --accent-lt: #2A1A12;
+      --green:     #4DB87A;
+      --green-lt:  #0D2318;
+      --green-br:  #2A6644;
+      --red-lt:    #2A100A;
+      --red-br:    #7A2A18;
+      --yellow-lt: #1E1A08;
+      --yellow-br: #6B5500;
+      --yellow-ink:#E8C84A;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* Big icon */
+    .icon-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin: 0 auto 24px;
+    }
+    .icon-circle.danger  { background: var(--red-lt);    border: 2px solid var(--red-br); }
+    .icon-circle.suspect { background: var(--yellow-lt); border: 2px solid var(--yellow-br); }
+
+    .headline {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .headline.danger  { color: var(--accent); }
+    .headline.suspect { color: var(--yellow-ink); }
+
+    .subline {
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+
+    .url-display {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.82rem;
+      word-break: break-all;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 0;
+    }
+    .url-display.danger  { background: var(--red-lt);    color: var(--accent); border: 1px solid var(--red-br); }
+    .url-display.suspect { background: var(--yellow-lt); color: var(--yellow-ink); border: 1px solid var(--yellow-br); }
+
+    .reasons {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .reason-item {
+      font-size: 0.82rem;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .reason-item.danger  { background: var(--red-lt);    color: var(--accent);     border: 1px solid var(--red-br); }
+    .reason-item.suspect { background: var(--yellow-lt); color: var(--yellow-ink); border: 1px solid var(--yellow-br); }
+
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* Action buttons */
+    .actions { display: flex; flex-direction: column; gap: 10px; }
+
+    .btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    .btn-safe   { background: var(--green); color: #fff; }
+    .btn-back   { background: var(--card); color: var(--ink); border: 1.5px solid var(--rule); }
+    .btn-back:hover { border-color: var(--ink); }
+    .btn-danger { background: var(--accent); color: #fff; }
+
+    /* Danger = no proceed button shown */
+    .blocked-note {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 14px;
+      line-height: 1.6;
+    }
+
+    .brand-footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .brand-footer a { color: var(--accent); text-decoration: none; font-family: 'Space Mono', monospace; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  {% if threat_label == "dangerous" %}
+
+    <div class="icon-circle danger">🚨</div>
+    <div class="headline danger">Dangerous Link Blocked</div>
+    <p class="subline">This URL has been identified as highly dangerous.<br>It has been <strong>blocked</strong> to protect you.</p>
+
+    <div class="card">
+      <div class="section-label">Blocked URL</div>
+      <div class="url-display danger">{{ original }}</div>
+      {% if threat_reasons %}
+      <div class="reasons">
+        {% for reason in threat_reasons %}
+        <div class="reason-item danger">🚨 {{ reason }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-back" href="/">← Go back to LinkCut</a>
+    </div>
+
+    <p class="blocked-note">
+      Threat score: <strong>{{ threat_score }}/5</strong> — This link cannot be opened.<br>
+      If you believe this is a mistake, contact the link creator.
+    </p>
+
+  {% else %}
+
+    <div class="icon-circle suspect">⚠️</div>
+    <div class="headline suspect">Suspicious Link Warning</div>
+    <p class="subline">This URL has been flagged as potentially suspicious.<br>Do you still want to continue?</p>
+
+    <div class="card">
+      <div class="section-label">Destination URL</div>
+      <div class="url-display suspect">{{ original }}</div>
+      {% if threat_reasons %}
+      <div class="reasons">
+        {% for reason in threat_reasons %}
+        <div class="reason-item suspect">⚠️ {{ reason }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-back" href="/">← Take me back, I don't trust this</a>
+      <a class="btn btn-danger" href="/{{ code }}?proceed=yes">I understand the risk — Continue anyway</a>
+    </div>
+
+    <p class="blocked-note">
+      Threat score: <strong>{{ threat_score }}/5</strong> — Proceeding is at your own risk.
+    </p>
+
+  {% endif %}
+
+  <div class="brand-footer">
+    Protected by <a href="/">LinkCut</a>
+  </div>
+
+</div>
+
+<script>
+  const saved = localStorage.getItem('lc-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+</script>
+</body>
+</html>
